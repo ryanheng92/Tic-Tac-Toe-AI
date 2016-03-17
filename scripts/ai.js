@@ -68,19 +68,17 @@ AIAction.DESCENDING = function(firstAction, secondAction) {
  */
 var AI = function(level) {
 
-    //private attribute: level of intelligence the player has
-    var levelOfIntelligence = level;
-
     //private attribute: the game the player is playing
     var game = {};
 
     /*
      * private recursive function that computes the minimax value of a game state
      * @param state [State] : the state to calculate its minimax value
+	 * @param depth [Number] : the depth of the minimax search
      * @returns [Number]: the minimax value of the state
      */
-    function minimaxValue(state) {
-        if(state.isTerminal()) {
+    function minimaxValue(state, depth) {
+        if(state.isTerminal() || depth == 0) {
             //a terminal game state is the base case
             return Game.score(state);
         }
@@ -108,7 +106,7 @@ var AI = function(level) {
             /* calculate the minimax value for all available next states
              * and evaluate the current state's value */
             availableNextStates.forEach(function(nextState) {
-                var nextScore = minimaxValue(nextState);
+                var nextScore = minimaxValue(nextState, depth-1);
                 if(state.turn === "X") {
                     // X wants to maximize --> update stateScore iff nextScore is larger
                     if(nextScore > stateScore)
@@ -197,7 +195,7 @@ var AI = function(level) {
      * that is: choose the optimal minimax decision
      * @param turn [String]: the player to play, either X or O
      */
-    function takeAMasterMove(turn) {
+    function takeAMasterMove(turn, depth) {
         var available = game.currentState.emptyCells();
 
         //enumerate and calculate the score for each avaialable actions to the ai player
@@ -205,7 +203,7 @@ var AI = function(level) {
             var action =  new AIAction(pos); //create the action object
             var next = action.applyTo(game.currentState); //get next state by applying the action
 
-            action.minimaxVal = minimaxValue(next); //calculate and set the action's minmax value
+            action.minimaxVal = minimaxValue(next, depth); //calculate and set the action's minmax value
 
             return action;
         });
@@ -242,11 +240,6 @@ var AI = function(level) {
      * @param turn [String]: the player to play, either X or O
      */
     this.notify = function(turn) {
-        switch(levelOfIntelligence) {
-            //invoke the desired behavior based on the level chosen
-            case "blind": takeABlindMove(turn); break;
-            case "novice": takeANoviceMove(turn); break;
-            case "master": takeAMasterMove(turn); break;
-        }
+		takeAMasterMove(turn, level);
     };
 };
