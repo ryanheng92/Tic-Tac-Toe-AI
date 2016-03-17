@@ -195,4 +195,52 @@ Game.score = function(_state) {
         //it's a draw
         return 0;
     }
+	var B = _state.board;
+	var points = 0;
+	
+	function scoreLine(cells) {
+		var countX = 0;
+		var countO = 0;
+		var points = 0;
+		for(var i = 0; i <= 2; i++) {
+			if(cells[i] === "X") {
+				countX++;
+			}
+			else if(cells[i] === "O") {
+				countO++;
+			}
+		}
+		// 1 point for 1-in-a-row
+		// 10 points for 2-in-a-row
+		// 100 points for 3-in-a-row
+		switch(countX) {
+            case 1: points += 1; break;
+            case 2: points += 10; break;
+            case 3: points += 100; break;
+        }
+		switch(countO) {
+            case 1: points -= 1; break;
+            case 2: points -= 10; break;
+            case 3: points -= 100; break;
+        }
+		return points
+	}
+	//score rows
+	for(var i = 0; i <= 6; i = i + 3) {
+		points += scoreLine([B[i], B[i + 1], B[i + 2]]);
+    }
+
+	//score columns
+	for(var i = 0; i <= 2 ; i++) {
+		points += scoreLine([B[i], B[i + 3], B[i + 6]]);
+	}
+
+	//score diagonals
+	for(var i = 0, j = 4; i <= 2 ; i = i + 2, j = j - 2) {
+		if(B[i] !== "E" && B[i] == B[i + j] && B[i + j] === B[i + 2*j]) {
+			this.result = B[i] + "-won"; //update the state result
+			return true;
+		}
+		points += scoreLine([B[i], B[i + j], B[i + 2*j]]);
+	}
 }
